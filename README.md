@@ -29,6 +29,8 @@ import { useFigmaState } from "figma-store";
 
 ## Usage
 
+### `ui` context
+
 Within the `ui` context you can create a reactive state which will be synced to `clientStorage`.
 
 ```svelte
@@ -52,6 +54,16 @@ Within the `ui` context you can create a reactive state which will be synced to 
     <button on:click={() => count.update((value) => value + 1)}>Increment</button>
     <p>{count}</p>
 {/if}
+```
+
+### `main` context
+
+```ts
+let count = useFigmaState<number>("count");
+
+figma.on("selectionchange", () => {
+    count.set(figma.currentPage.selection.length);
+});
 ```
 
 ## Methods
@@ -116,3 +128,7 @@ Within the `main` context you can also manipulate the state.
     ```ts
     console.log(count.get()); // => 10
     ```
+
+```
+
+```

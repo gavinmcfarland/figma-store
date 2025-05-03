@@ -33,31 +33,22 @@ export default async function () {
 		}
 	};
 
-	// let count = await figma.clientStorage.getAsync("count");
-
 	let count = useFigmaState<number>("count");
-
+	let nodeCount = useFigmaState<number>("nodeCount");
 	// Testing setting value immediately
 	// await count.set(100);
 
-	console.log("main count", await count.get());
+	// console.log("main count", await count.get());
 
-	// Testing setting value after 3 seconds
-	await new Promise((resolve) => setTimeout(resolve, 3000));
-	// count.set(200);
+	// // Testing setting value after 3 seconds
+	// await new Promise((resolve) => setTimeout(resolve, 3000));
+	// // count.set(200);
 
-	await count.update((value) => {
-		return value + 1;
+	// await count.update((value) => {
+	// 	return value + 1;
+	// });
+
+	figma.on("selectionchange", () => {
+		nodeCount.set(figma.currentPage.selection.length);
 	});
-
-	function postNodeCount() {
-		const nodeCount = figma.currentPage.selection.length;
-
-		figma.ui.postMessage({
-			type: "POST_NODE_COUNT",
-			count: nodeCount,
-		});
-	}
-
-	figma.on("selectionchange", postNodeCount);
 }

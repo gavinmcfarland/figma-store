@@ -1,5 +1,6 @@
 // Used in main code context only
 
+// TODO: Can useFigmaState also create the clientStorage key if it hasn't been created by the UI yet?
 export function useFigmaState<T>(key: string, initialValue?: T) {
 	async function set(value: T) {
 		await figma.clientStorage.setAsync(key, value);

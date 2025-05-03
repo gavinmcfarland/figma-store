@@ -18,17 +18,18 @@
 		);
 	}
 
-	window.onmessage = (event) => {
-		let message = event.data.pluginMessage;
+	// window.onmessage = (event) => {
+	// 	let message = event.data.pluginMessage;
 
-		if (message.type === "POST_NODE_COUNT") {
-			nodeCount = message.count;
-		}
-	};
+	// 	if (message.type === "POST_NODE_COUNT") {
+	// 		nodeCount = message.count;
+	// 	}
+	// };
 
 	let rectCount: number = $state(5);
-	let nodeCount: number = $state(0);
+	// let nodeCount: number = $state(0);
 
+	let nodeCount = useFigmaState<number>("nodeCount", 0);
 	const count = useFigmaState<number>("count");
 	let isInitialized = $state(false);
 
@@ -60,13 +61,15 @@
 			>
 		</div>
 		<div class="field node-count">
-			<span>{nodeCount} nodes selected</span>
+			<span>{nodeCount.get()} nodes selected</span>
 		</div>
 		<div class="field count">
 			<Button onclick={() => count.update((state) => state + 1)}>
 				Increment
 			</Button>
+
 			<Button onclick={() => count.set(0)}>Reset</Button>
+
 			<p>{count.get()}</p>
 		</div>
 	</div>
