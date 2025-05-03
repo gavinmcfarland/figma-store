@@ -1,5 +1,5 @@
 // Read the docs https://plugma.dev/docs
-import { initListeners } from "figma-store";
+import { initListeners, useFigmaState } from "figma-store";
 
 export default async function () {
 	figma.showUI(__html__, { width: 300, height: 260, themeColors: true });
@@ -35,21 +35,16 @@ export default async function () {
 		}
 	};
 
-	let count = await figma.clientStorage.getAsync("count");
+	// let count = await figma.clientStorage.getAsync("count");
 
-	// await new Promise((resolve) => setTimeout(resolve, 3000));
-	figma.ui.postMessage({
-		type: "UPDATE_STATE",
-		value: 100,
-		key: "count",
-	});
+	let count = useFigmaState("count");
 
+	// Testing setting value immediately
+	count.set(100);
+
+	// Testing setting value after 3 seconds
 	await new Promise((resolve) => setTimeout(resolve, 3000));
-	figma.ui.postMessage({
-		type: "UPDATE_STATE",
-		value: 29,
-		key: "count",
-	});
+	count.set(200);
 
 	function postNodeCount() {
 		const nodeCount = figma.currentPage.selection.length;

@@ -1,5 +1,5 @@
-function useFigmaState<T>(key: string, initialValue: T) {
-	function update(value: T) {
+export function useFigmaState<T>(key: string, initialValue?: T) {
+	function set(value: T) {
 		figma.ui.postMessage({
 			type: "UPDATE_STATE",
 			value: value,
@@ -7,8 +7,6 @@ function useFigmaState<T>(key: string, initialValue: T) {
 		});
 	}
 	return {
-		update,
+		set,
 	};
 }
-
-export default useFigmaState;
