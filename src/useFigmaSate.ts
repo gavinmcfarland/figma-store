@@ -13,11 +13,7 @@ export function useFigmaState<T>(key: string, initialValue?: T) {
 
 	function update(updateFunction: (value: T) => T) {
 		get().then((currentValue) => {
-			figma.ui.postMessage({
-				type: "UPDATE_STATE",
-				value: updateFunction(currentValue),
-				key: key,
-			});
+			set(updateFunction(currentValue));
 		});
 	}
 

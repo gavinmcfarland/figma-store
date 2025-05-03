@@ -110,3 +110,9 @@ Within the `main` context you can also manipulate the state.
     ```ts
     count.update((value) => value + 1);
     ```
+
+- ### Get
+
+    ```ts
+    console.log(count.get()); // => 10
+    ```
