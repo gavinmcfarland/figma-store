@@ -16,12 +16,14 @@ npm install github:gavinmcfarland/figma-store
 Inside the UI import the `figmaState` runable store.
 
 ```js
-import { figmaState } from "figma-store";
+// ui.ts
+import { useFigmaStateSvelte } from "figma-store";
 ```
 
 Within the main code, initialise the listeners required for the UI to make updates to `clientStorage` and `pluginData`.
 
 ```js
+// code.ts
 import { initListeners } from "figma-store";
 
 initListeners();
@@ -34,20 +36,26 @@ initListeners();
 To persist a store to `clientStorage` provide a key.
 
 ```ts
-let count = await figmaState<number>("count");
+// ui.ts
+let count = await useFigmaStateSvelte<number>("count");
 ```
 
 This loads the store from `clientStorage`.
 
-Use the `initialize` method to initialise the store.
+Use the `onInit` method to listen for when the state is initialised.
 
 ```js
-await count.initialize();
+// ui.ts
+let isInitialized = $state(false);
+count.onInit((value) => {
+    isInitialized = true;
+});
 ```
 
 ### Updating a store
 
 ```js
+// ui.ts
 count.update((value) => {
   return value + 1
 )
@@ -60,6 +68,7 @@ This is synchronouse and immediately updates the value of the store in the UI wh
 The same happens for replacing the value using `set`.
 
 ```ts
+// ui.ts
 count.set(10);
 ```
 
@@ -68,8 +77,24 @@ count.set(10);
 Retrieve the value of the store from the UI.
 
 ```ts
+// ui.ts
 console.log(count.get()); // => 10
 ```
+
+### Updating from the main code
+
+Update the value of the store from the main code. (tempory implementation)
+
+```ts
+// code.ts
+figma.ui.postMessage({
+    type: "UPDATE_STATE",
+    value: 100,
+    key: "count",
+});
+```
+
+---
 
 ## PluginData (experimental)
 

@@ -7,7 +7,7 @@ type NodeTargetFn = (
 	params: Record<string, any>,
 ) => SceneNode | BaseNode[];
 
-export function figmaState<T>(
+export function useFigmaState<T>(
 	storageKey: string,
 	initialValue?: T,
 	nodeTarget?: NodeTargetFn,
