@@ -31,7 +31,7 @@ import { useFigmaState } from "figma-store";
 
 ### `ui` context
 
-Within the `ui` context you can create a reactive state which will be synced to `clientStorage`.
+Within the `ui` context you can create a reactive state using the `useFigmaState` reactive primitive.
 
 ```svelte
 <!-- ui.svelte -->
@@ -56,6 +56,8 @@ Within the `ui` context you can create a reactive state which will be synced to 
 {/if}
 ```
 
+When you close and reopen the plugin the state will be persisted in `clientStorage`.
+
 ### `main` context
 
 From the `main` context you can also manipulate the state.
@@ -67,6 +69,8 @@ figma.on("selectionchange", () => {
     count.set(figma.currentPage.selection.length);
 });
 ```
+
+The state in the `ui` context will be updated when the user changes the selection.
 
 ## Methods
 
