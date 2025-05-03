@@ -26,6 +26,8 @@ export function figmaState<T>(
 	// @ts-ignore
 	let value = $state<T | undefined>(initialValue);
 
+	let initCallbacks: ((state: T | undefined) => Promise<void> | void)[] = [];
+
 	const messageHandler = (event: MessageEvent) => {
 		let message = event.data.pluginMessage;
 		if (message.type === "STATE_UPDATE") {
@@ -34,6 +36,7 @@ export function figmaState<T>(
 		}
 	};
 
+	init();
 	// @ts-ignore
 	$effect(() => {
 		if (listeners === 0) {
@@ -110,6 +113,8 @@ export function figmaState<T>(
 			}
 
 			isInitialized = true;
+			// Call all registered init callbacks
+			await Promise.all(initCallbacks.map((callback) => callback(value)));
 		} catch (error) {
 			console.error(
 				`Failed to load state from storage for key "${storageKey}":`,
@@ -167,6 +172,34 @@ export function figmaState<T>(
 		update,
 		updateAsync,
 		getNodeTarget,
+		onInit: async (
+			callback?: (state: T | undefined) => Promise<void> | void,
+		) => {
+			if (isInitialized) {
+				// If already initialized, call callback if provided
+				if (callback) {
+					await Promise.resolve(callback(value));
+				}
+				return;
+			}
+
+			// Create a promise that resolves when initialization is complete
+			const initPromise = new Promise<void>((resolve) => {
+				initCallbacks.push(async (state) => {
+					if (callback) {
+						await Promise.resolve(callback(state));
+					}
+					resolve();
+				});
+			});
+
+			// Start initialization if not already started
+			if (!isInitialized) {
+				init();
+			}
+
+			return initPromise;
+		},
 		subscribe: (callback: (val: T) => void) => {
 			if (listeners === 0) {
 				window.addEventListener("message", messageHandler);

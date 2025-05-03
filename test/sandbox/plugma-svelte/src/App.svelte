@@ -33,8 +33,11 @@
 	let isInitialized = $state(false);
 
 	onMount(async () => {
-		await count.init();
-		isInitialized = true;
+		// await count.init();
+		count.onInit((state) => {
+			console.log("state", state);
+			isInitialized = true;
+		});
 	});
 </script>
 

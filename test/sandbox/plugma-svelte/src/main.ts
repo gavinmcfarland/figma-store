@@ -43,8 +43,6 @@ export default async function () {
 		value: 100,
 	});
 
-	console.log(count);
-
 	function postNodeCount() {
 		const nodeCount = figma.currentPage.selection.length;
 
