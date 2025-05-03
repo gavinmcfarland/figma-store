@@ -60,7 +60,7 @@ When you close and reopen the plugin the state will be persisted in `clientStora
 
 ### `main` context
 
-From the `main` context you can also manipulate the state.
+From the `main` context you can also manipulate the state. With the following example the state in the `ui` context will be updated when the user changes the selection.
 
 ```ts
 let count = useFigmaState<number>("count");
@@ -69,8 +69,6 @@ figma.on("selectionchange", () => {
     count.set(figma.currentPage.selection.length);
 });
 ```
-
-The state in the `ui` context will be updated when the user changes the selection.
 
 ## Methods
 
