@@ -17,6 +17,10 @@
         ".": {
             "import": "./dist/index.js",
             "types": "./dist/types/index.d.ts"
+        },
+        "./svelte": {
+            "import": "./dist/svelte/index.js",
+            "types": "./dist/types/svelte/index.d.ts"
         }
     },
     "keywords": [],

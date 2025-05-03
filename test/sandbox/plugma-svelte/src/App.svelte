@@ -3,7 +3,7 @@
 	import Icon from "./components/Icon.svelte";
 	import Input from "./components/Input.svelte";
 	import Button from "./components/Button.svelte";
-	import { useFigmaStateSvelte } from "figma-store";
+	import { useFigmaState } from "figma-store/svelte";
 	import { onMount } from "svelte";
 
 	function createRectangles(count: number) {
@@ -29,7 +29,7 @@
 	let rectCount: number = $state(5);
 	let nodeCount: number = $state(0);
 
-	const count = useFigmaStateSvelte<number>("count");
+	const count = useFigmaState<number>("count");
 	let isInitialized = $state(false);
 
 	onMount(async () => {

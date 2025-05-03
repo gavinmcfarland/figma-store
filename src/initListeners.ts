@@ -1,4 +1,4 @@
-export function initListeners() {
+function initListeners() {
 	figma.ui.on("message", async (message, props) => {
 		// if (props.origin !== SITE_URL) {
 		// 	return
@@ -59,3 +59,5 @@ export function initListeners() {
 		}
 	});
 }
+
+initListeners();

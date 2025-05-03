@@ -1,10 +1,8 @@
 // Read the docs https://plugma.dev/docs
-import { initListeners, useFigmaState } from "figma-store";
+import { useFigmaState } from "figma-store";
 
 export default async function () {
 	figma.showUI(__html__, { width: 300, height: 260, themeColors: true });
-
-	initListeners();
 
 	figma.ui.onmessage = (message) => {
 		if (message.type === "CREATE_RECTANGLES") {
@@ -37,14 +35,20 @@ export default async function () {
 
 	// let count = await figma.clientStorage.getAsync("count");
 
-	let count = useFigmaState("count");
+	let count = useFigmaState<number>("count");
 
 	// Testing setting value immediately
-	count.set(100);
+	// await count.set(100);
+
+	console.log("main count", await count.get());
 
 	// Testing setting value after 3 seconds
 	await new Promise((resolve) => setTimeout(resolve, 3000));
-	count.set(200);
+	// count.set(200);
+
+	await count.update((value) => {
+		return value + 1;
+	});
 
 	function postNodeCount() {
 		const nodeCount = figma.currentPage.selection.length;
