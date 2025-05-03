@@ -34,7 +34,7 @@ export function figmaState<T>(
 
 	const messageHandler = (event: MessageEvent) => {
 		let message = event.data.pluginMessage;
-		if (message.type === "STATE_UPDATE") {
+		if (message.type === "UPDATE_STATE" && message.key === storageKey) {
 			console.log(
 				"Received message:",
 				message.value,
