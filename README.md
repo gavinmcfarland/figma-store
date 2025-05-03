@@ -58,6 +58,8 @@ Within the `ui` context you can create a reactive state which will be synced to 
 
 ### `main` context
 
+From the `main` context you can also manipulate the state.
+
 ```ts
 let count = useFigmaState<number>("count");
 
