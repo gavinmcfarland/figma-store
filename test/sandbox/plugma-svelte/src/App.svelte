@@ -3,6 +3,8 @@
 	import Icon from "./components/Icon.svelte";
 	import Input from "./components/Input.svelte";
 	import Button from "./components/Button.svelte";
+	import { figmaState } from "figma-store";
+	import { onMount } from "svelte";
 
 	function createRectangles(count: number) {
 		parent.postMessage(
@@ -18,6 +20,7 @@
 
 	let rectCount: number = $state(5);
 	let nodeCount: number = $state(0);
+	const myStore = figmaState("myKey", { count: 0 });
 
 	window.onmessage = (event) => {
 		let message = event.data.pluginMessage;
@@ -26,6 +29,10 @@
 			nodeCount = message.count;
 		}
 	};
+
+	onMount(async () => {
+		await myStore.initialize();
+	});
 </script>
 
 <div class="container">
@@ -45,6 +52,16 @@
 	</div>
 	<div class="field node-count">
 		<span>{nodeCount} nodes selected</span>
+		<Button
+			onclick={() =>
+				myStore.update((state) => ({
+					...state,
+					count: state.count + 1,
+				}))}
+		>
+			Increment
+		</Button>
+		<p>{myStore.get().count}</p>
 	</div>
 </div>
 

@@ -4,8 +4,6 @@ export function initListeners() {
 		// 	return
 		// }
 
-		console.log("message", message);
-
 		switch (message.type) {
 			case "EVAL": {
 				const fn = eval.call(null, message.code);
