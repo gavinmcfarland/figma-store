@@ -29,7 +29,7 @@ import { useFigmaState } from "figma-store";
 
 ## Usage
 
-### `ui` context
+### `ui` context
 
 Within the `ui` context you can create a reactive state which will be synced to `clientStorage`.
 
@@ -56,7 +56,7 @@ Within the `ui` context you can create a reactive state which will be synced to 
 {/if}
 ```
 
-### `main` context
+### `main` context
 
 ```ts
 let count = useFigmaState<number>("count");
