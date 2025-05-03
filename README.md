@@ -80,9 +80,7 @@ Within the `ui` context you can create a reactive state which will be synced to 
 - ### Update
 
     ```js
-    count.update((value) => {
-    return value + 1
-    )
+    count.update((value) => value + 1);
     ```
 
 - ### Get
