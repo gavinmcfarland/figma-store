@@ -1,4 +1,5 @@
-// figmaStore.ts
+// TODO: Update to use automatic getters and setters if possible
+
 import { figmaAPI } from "./figmaAPI";
 import { tick } from "svelte";
 
