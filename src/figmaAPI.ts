@@ -7,15 +7,15 @@ class FigmaAPI {
 	 */
 	private figmaScopedRun<T, U>(
 		fn: (figma: PluginAPI, params: U | undefined) => Promise<T> | T,
-		params?: U
+		params?: U,
 	): string {
 		// Ensure the Figma typings are scoped within this function and return the function string
-		if (typeof figma !== "undefined") {
-			// We return the stringified function to be passed to postMessage
-			return fn.toString();
-		} else {
-			throw new Error("Figma environment not available.");
-		}
+		// if (typeof figma !== "undefined") {
+		// We return the stringified function to be passed to postMessage
+		return fn.toString();
+		// } else {
+		// 	throw new Error("Figma environment not available.");
+		// }
 	}
 
 	/**
@@ -26,7 +26,7 @@ class FigmaAPI {
 	 */
 	run<T, U extends Record<string, any> | undefined>(
 		fn: (figma: PluginAPI, params: U | undefined) => Promise<T> | T,
-		params?: U
+		params?: U,
 	): Promise<T> {
 		return new Promise((resolve, reject) => {
 			const id = this.id++;
@@ -47,8 +47,8 @@ class FigmaAPI {
 							new Error(
 								typeof message === "string"
 									? message
-									: "An error occurred in FigmaAPI.run()"
-							)
+									: "An error occurred in FigmaAPI.run()",
+							),
 						);
 					}
 				}

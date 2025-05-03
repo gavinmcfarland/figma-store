@@ -1,8 +1,10 @@
 export function initListeners() {
-	figma.ui.onmessage = async (message, props) => {
+	figma.ui.on("message", async (message, props) => {
 		// if (props.origin !== SITE_URL) {
 		// 	return
 		// }
+
+		console.log("message", message);
 
 		switch (message.type) {
 			case "EVAL": {
@@ -27,7 +29,7 @@ export function initListeners() {
 								}
 							}
 							return value;
-						}
+						},
 					);
 
 					const result = await fn(figma, parsedObj);
@@ -43,8 +45,8 @@ export function initListeners() {
 							typeof e === "string"
 								? e
 								: e && typeof e === "object" && "message" in e
-								? e.message
-								: null,
+									? e.message
+									: null,
 						id: message.id,
 					});
 				}
@@ -52,5 +54,5 @@ export function initListeners() {
 				break;
 			}
 		}
-	};
+	});
 }

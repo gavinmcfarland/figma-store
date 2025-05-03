@@ -7,6 +7,7 @@
     "types": "./dist/types/index.d.ts",
     "scripts": {
         "build": "tsc",
+        "dev": "tsc --watch",
         "prepublishOnly": "npm run build"
     },
     "files": [
@@ -28,5 +29,11 @@
     "dependencies": {
         "@figma/plugin-typings": "^1.100.2",
         "svelte": "^4.2.19"
+    },
+    "packageManager": "pnpm@9.10.0",
+    "engines": {
+        "node": ">=20.17.0",
+        "pnpm": ">=9.10.0",
+        "npm": "forbidden, use pnpm"
     }
 }

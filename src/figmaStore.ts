@@ -1,8 +1,6 @@
 import { writable, type Writable, get } from "svelte/store";
 import { figmaAPI } from "./figmaAPI";
 
-type StoreValue = object | number | string | boolean | null;
-
 export class FigmaStore<T extends StoreValue> {
 	private state: T;
 	private store: Writable<T>;
@@ -10,7 +8,7 @@ export class FigmaStore<T extends StoreValue> {
 	private storageKey: string;
 	private nodeTarget?: (
 		figma: PluginAPI,
-		params: Record<string, any>
+		params: Record<string, any>,
 	) => SceneNode | BaseNode[]; // Updated to return either SceneNode or BaseNode[]
 
 	constructor(
@@ -18,14 +16,14 @@ export class FigmaStore<T extends StoreValue> {
 		initialValue: T, // Changed from defaultState to initialValue
 		nodeTarget?: (
 			figma: PluginAPI,
-			params: Record<string, any>
+			params: Record<string, any>,
 		) => SceneNode | BaseNode[], // Updated
-		private params?: Record<string, any>
+		private params?: Record<string, any>,
 	) {
 		// Check if we're in the Figma main code environment
 		if (typeof figma !== "undefined") {
 			throw new Error(
-				"FigmaStore cannot be used in the Figma main thread."
+				"FigmaStore cannot be used in the Figma main thread.",
 			);
 		}
 
@@ -43,9 +41,9 @@ export class FigmaStore<T extends StoreValue> {
 		initialValue: T, // Changed from defaultState to initialValue
 		nodeTarget?: (
 			figma: PluginAPI,
-			params: Record<string, any>
+			params: Record<string, any>,
 		) => SceneNode | BaseNode[], // Updated
-		params?: Record<string, any> // Optional fourth parameter
+		params?: Record<string, any>, // Optional fourth parameter
 	): Promise<FigmaStore<T>> {
 		const store = new FigmaStore(key, initialValue, nodeTarget, params);
 		await store.initialize();
@@ -67,7 +65,7 @@ export class FigmaStore<T extends StoreValue> {
 					if (!key) return;
 					return await figma.clientStorage.getAsync(key);
 				},
-				{ key: this.storageKey, params: this.params }
+				{ key: this.storageKey, params: this.params },
 			);
 
 			// Ensure that storedState is only applied if it is not undefined
@@ -80,7 +78,7 @@ export class FigmaStore<T extends StoreValue> {
 		} catch (error) {
 			console.error(
 				`Failed to load state from storage for key "${this.storageKey}":`,
-				error
+				error,
 			);
 		}
 	}
@@ -88,7 +86,7 @@ export class FigmaStore<T extends StoreValue> {
 	/** Svelte's subscribe method */
 	subscribe(
 		run: (value: T) => void,
-		invalidate?: (value?: T) => void
+		invalidate?: (value?: T) => void,
 	): () => void {
 		return this.store.subscribe(run, invalidate);
 	}
@@ -117,7 +115,7 @@ export class FigmaStore<T extends StoreValue> {
 
 	/** Update the state with an asynchronous updater function */
 	async updateAsync(
-		asyncUpdaterFunction: (state: T) => Promise<T>
+		asyncUpdaterFunction: (state: T) => Promise<T>,
 	): Promise<void> {
 		try {
 			const storedState = await figmaAPI.run(
@@ -153,7 +151,7 @@ export class FigmaStore<T extends StoreValue> {
 					asyncUpdaterFunction,
 					initialValue: this.state, // Changed from defaultState to initialValue
 					params: this.params, // Pass optional params
-				}
+				},
 			);
 
 			this.state = storedState || this.state;
@@ -202,7 +200,7 @@ export class FigmaStore<T extends StoreValue> {
 		} catch (error) {
 			console.error(
 				`Failed to save state to storage for key "${this.storageKey}":`,
-				error
+				error,
 			);
 		}
 	}
