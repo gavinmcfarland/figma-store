@@ -31,8 +31,8 @@ import { useFigmaState } from "figma-store";
 
 Within the `ui` context you can create a reactive state which will be synced to `clientStorage`.
 
-```ts
-// ui.ts
+```svelte
+<!-- ui.svelte -->
 <script lang="ts">
     import { useFigmaState } from "figma-store/svelte";
 
