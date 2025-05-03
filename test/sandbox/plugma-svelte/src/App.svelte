@@ -6,6 +6,8 @@
 	import { useFigmaState } from "figma-store/svelte";
 	import { onMount } from "svelte";
 
+	let rectCount: number = $state(5);
+
 	function createRectangles(count: number) {
 		parent.postMessage(
 			{
@@ -18,19 +20,9 @@
 		);
 	}
 
-	// window.onmessage = (event) => {
-	// 	let message = event.data.pluginMessage;
-
-	// 	if (message.type === "POST_NODE_COUNT") {
-	// 		nodeCount = message.count;
-	// 	}
-	// };
-
-	let rectCount: number = $state(5);
-	// let nodeCount: number = $state(0);
-
 	let nodeCount = useFigmaState<number>("nodeCount", 0);
-	const count = useFigmaState<number>("count");
+	let count = useFigmaState<number>("count");
+
 	let isInitialized = $state(false);
 
 	onMount(async () => {
