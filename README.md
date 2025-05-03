@@ -81,17 +81,15 @@ Retrieve the value of the store from the UI.
 console.log(count.get()); // => 10
 ```
 
-### Updating from the main code
+### Setting state from the main code
 
-Update the value of the store from the main code. (tempory implementation)
+Set the value of the store from the main code.
 
 ```ts
 // code.ts
-figma.ui.postMessage({
-    type: "UPDATE_STATE",
-    value: 100,
-    key: "count",
-});
+let count = useFigmaState<number>("count");
+
+count.set(100);
 ```
 
 ---
