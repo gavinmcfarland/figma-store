@@ -18,10 +18,6 @@
 		);
 	}
 
-	let rectCount: number = $state(5);
-	let nodeCount: number = $state(0);
-	const myStore = figmaState("count", 0);
-
 	window.onmessage = (event) => {
 		let message = event.data.pluginMessage;
 
@@ -30,34 +26,43 @@
 		}
 	};
 
+	let rectCount: number = $state(5);
+	let nodeCount: number = $state(0);
+
+	const count = figmaState<number>("count");
+	let isInitialized = $state(false);
+
 	onMount(async () => {
-		await myStore.initialize();
+		await count.initialize();
+		isInitialized = true;
 	});
 </script>
 
-<div class="container">
-	<div class="banner">
-		<Icon svg="plugma" size={38} />
+{#if isInitialized}
+	<div class="container">
+		<div class="banner">
+			<Icon svg="plugma" size={38} />
 
-		<Icon svg="plus" size={24} />
+			<Icon svg="plus" size={24} />
 
-		<img src={svelteLogo} width="44" height="44" alt="Svelte logo" />
-	</div>
+			<img src={svelteLogo} width="44" height="44" alt="Svelte logo" />
+		</div>
 
-	<div class="field create-rectangles">
-		<Input type="number" bind:value={rectCount}></Input>
-		<Button onclick={() => createRectangles(rectCount)}
-			>Create Rectangles</Button
-		>
+		<div class="field create-rectangles">
+			<Input type="number" bind:value={rectCount}></Input>
+			<Button onclick={() => createRectangles(rectCount)}
+				>Create Rectangles</Button
+			>
+		</div>
+		<div class="field node-count">
+			<span>{nodeCount} nodes selected</span>
+			<Button onclick={() => count.update((state) => state + 1)}>
+				Increment
+			</Button>
+			<p>{count.get()}</p>
+		</div>
 	</div>
-	<div class="field node-count">
-		<span>{nodeCount} nodes selected</span>
-		<Button onclick={() => myStore.update((state) => state + 1)}>
-			Increment
-		</Button>
-		<p>{myStore.get()}</p>
-	</div>
-</div>
+{/if}
 
 <style>
 	.container {

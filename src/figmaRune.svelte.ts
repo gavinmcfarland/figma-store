@@ -8,7 +8,7 @@ type NodeTargetFn = (
 
 export function figmaState<T>(
 	storageKey: string,
-	initialValue: T,
+	initialValue?: T,
 	nodeTarget?: NodeTargetFn,
 	params?: Record<string, any>,
 ) {
@@ -20,7 +20,7 @@ export function figmaState<T>(
 	let isInitialized = false;
 
 	// @ts-ignore
-	let store = $state<T>(initialValue);
+	let store = $state<T | undefined>(initialValue);
 
 	async function _saveStateToStorage() {
 		try {
@@ -71,16 +71,11 @@ export function figmaState<T>(
 	}
 
 	async function initialize() {
-		console.log("initializing", isInitialized);
 		if (isInitialized) return;
 
 		try {
 			const storedState = await _loadStateFromStorage();
-			// Ensure that storedState is only applied if it is not undefined
-			if (typeof storedState !== "undefined") {
-				store = storedState;
-			}
-
+			// Apply stored state if it exists, otherwise keep initialValue
 			if (typeof storedState !== "undefined") {
 				store = storedState;
 			}
@@ -100,7 +95,7 @@ export function figmaState<T>(
 		_saveStateToStorage();
 	});
 
-	function get(): T {
+	function get(): T | undefined {
 		return store;
 	}
 

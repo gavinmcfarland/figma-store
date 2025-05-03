@@ -3,20 +3,20 @@
 This allows you to create stores which can persists in `clientStorage` and `pluginData`.
 
 > [!NOTE]
-> This is still a work in progress and things might not work as expected. It currently only supports Svelte.
+> This project is still in conception.
 
 ## Install
 
 ```shell
-npm install github:gavinmcfarland/figma-store
+npm install figma-store@next --save-dev
 ```
 
 ## Setup
 
-Inside the UI import the `figmaState` runable store.
+Inside the UI import the `FigmaStore` class.
 
 ```js
-import { figmaState } from "figma-store";
+import { FigmaStore } from "figma-store";
 ```
 
 Within the main code, initialise the listeners required for the UI to make updates to `clientStorage` and `pluginData`.
@@ -31,24 +31,18 @@ initListeners();
 
 ### Create a store
 
-To persist a store to `clientStorage` provide a key.
-
-```ts
-let count = await figmaState<number>("count");
-```
-
-This loads the store from `clientStorage`.
-
-Use the `initialize` method to initialise the store.
+To persist a store to `clientStorage` provide a key and an initial value.
 
 ```js
-await count.initialize();
+let store = await FigmaStore.create("key", { count: 0 });
 ```
+
+This initialises the store. When the UI loads, it will grab the data from the main code using `figma.clientStorage.getAsync("key")`.
 
 ### Updating a store
 
 ```js
-count.update((value) => {
+store.update((value) => {
   return value + 1
 )
 ```
@@ -59,40 +53,40 @@ This is synchronouse and immediately updates the value of the store in the UI wh
 
 The same happens for replacing the value using `set`.
 
-```ts
-count.set(10);
+```js
+store.set(0);
 ```
 
 ### Getting a store
 
 Retrieve the value of the store from the UI.
 
-```ts
-console.log(count.get()); // => 10
+```js
+console.log(store.get()); // => 0
 ```
 
-## PluginData (experimental)
+## PluginData
 
 Below is a basic example of storing a value using `pluginData`. It requires a key, an initial value and a function that returns the node for the plugin data to be set on.
 
-```ts
-let fileKey = await figmaState<null>("fileKey", null, (figma) => figma.root);
+```js
+let fileKey = await FigmaStore.create("fileKey", null, (figma) => figma.root);
 ```
 
 Below is a more complex example of setting `pluginData` on several nodes by returning an array of nodes. It also shows how you can also provide in a dynamic value in retrieving the node.
 
-```ts
-let store = await figmaState<null>(
+```js
+let store = await FigmaStore.create(
     `layerStyle${id}`,
     {},
     (figma, { id }) => {
         return figma.root.findAll((node) => node.name === layerStyle + id);
     },
-    { id },
+    { id }
 );
 ```
 
-## Async (experimental)
+## Async
 
 If you need to wait for a store to be set asynchronously, you can use the `Async` variant.
 
@@ -100,7 +94,7 @@ If you need to wait for a store to be set asynchronously, you can use the `Async
 
 For example, you can update a value based off some logic with the main code.
 
-```ts
+```js
 await sites.updateAsync(async (figma, store, { siteId }) => {
     store.map((site) => {
         const activeSite = await figma.clientStorage.getAsync("activeSite")
