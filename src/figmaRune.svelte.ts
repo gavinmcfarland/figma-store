@@ -28,11 +28,30 @@ export function figmaState<T>(
 
 	let initCallbacks: ((state: T | undefined) => Promise<void> | void)[] = [];
 
+	let messageQueue: { type: string; value: any }[] = [];
+
+	let initPromise: Promise<void> | null = null;
+
 	const messageHandler = (event: MessageEvent) => {
 		let message = event.data.pluginMessage;
 		if (message.type === "STATE_UPDATE") {
-			value = message.value;
-			version += 1;
+			console.log(
+				"Received message:",
+				message.value,
+				"isInitialized:",
+				isInitialized,
+			);
+			if (!isInitialized) {
+				messageQueue.push(message);
+				console.log(
+					"Queued message, queue length:",
+					messageQueue.length,
+				);
+			} else {
+				value = message.value;
+				version += 1;
+				console.log("Applied message directly, new value:", value);
+			}
 		}
 	};
 
@@ -103,24 +122,59 @@ export function figmaState<T>(
 	}
 
 	async function init() {
+		// If initialization is already in progress, wait for it
+		if (initPromise) {
+			return initPromise;
+		}
+
+		// If already initialized, return immediately
 		if (isInitialized) return;
 
-		try {
-			const storedState = await _loadStateFromStorage();
-			// Apply stored state if it exists, otherwise keep initialValue
-			if (typeof storedState !== "undefined") {
-				value = storedState;
-			}
+		// Create a new initialization promise
+		initPromise = (async () => {
+			try {
+				const storedState = await _loadStateFromStorage();
+				console.log("Loaded stored state:", storedState);
+				// Apply stored state if it exists, otherwise keep initialValue
+				if (typeof storedState !== "undefined") {
+					value = storedState;
+					console.log("Applied stored state, value:", value);
+				}
 
-			isInitialized = true;
-			// Call all registered init callbacks
-			await Promise.all(initCallbacks.map((callback) => callback(value)));
-		} catch (error) {
-			console.error(
-				`Failed to load state from storage for key "${storageKey}":`,
-				error,
-			);
-		}
+				isInitialized = true;
+				console.log(
+					"Processing queued messages, count:",
+					messageQueue.length,
+				);
+				// Process queued messages
+				while (messageQueue.length > 0) {
+					const message = messageQueue.shift();
+					console.log("Processing queued message:", message?.value);
+					if (message) {
+						value = message.value;
+						version += 1;
+						console.log(
+							"Applied queued message, new value:",
+							value,
+						);
+					}
+				}
+				// Call all registered init callbacks
+				await Promise.all(
+					initCallbacks.map((callback) => callback(value)),
+				);
+			} catch (error) {
+				console.error(
+					`Failed to load state from storage for key "${storageKey}":`,
+					error,
+				);
+			} finally {
+				// Clear the promise after initialization is complete
+				initPromise = null;
+			}
+		})();
+
+		return initPromise;
 	}
 
 	// @ts-ignore

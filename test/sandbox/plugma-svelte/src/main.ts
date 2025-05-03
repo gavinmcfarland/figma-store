@@ -38,10 +38,10 @@ export default async function () {
 	let count = await figma.clientStorage.getAsync("count");
 
 	// await new Promise((resolve) => setTimeout(resolve, 3000));
-	figma.ui.postMessage({
-		type: "STATE_UPDATE",
-		value: 100,
-	});
+	// figma.ui.postMessage({
+	// 	type: "STATE_UPDATE",
+	// 	value: 100,
+	// });
 
 	function postNodeCount() {
 		const nodeCount = figma.currentPage.selection.length;
