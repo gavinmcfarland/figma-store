@@ -1,6 +1,6 @@
 # Figma Store
 
-This allows you to create stores which can persists in `clientStorage` and `pluginData`.
+Simplifies state management in Figma plugins by syncing reactive values to `clientStorage` and `pluginData` behind the scenes.
 
 > [!NOTE]
 > This is still a work in progress and things might not work as expected. It currently only supports Svelte.
