@@ -20,7 +20,7 @@
 
 	let rectCount: number = $state(5);
 	let nodeCount: number = $state(0);
-	const myStore = figmaState("myKey", { count: 0 });
+	const myStore = figmaState("count", 0);
 
 	window.onmessage = (event) => {
 		let message = event.data.pluginMessage;
@@ -52,16 +52,10 @@
 	</div>
 	<div class="field node-count">
 		<span>{nodeCount} nodes selected</span>
-		<Button
-			onclick={() =>
-				myStore.update((state) => ({
-					...state,
-					count: state.count + 1,
-				}))}
-		>
+		<Button onclick={() => myStore.update((state) => state + 1)}>
 			Increment
 		</Button>
-		<p>{myStore.get().count}</p>
+		<p>{myStore.get()}</p>
 	</div>
 </div>
 

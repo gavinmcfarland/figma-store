@@ -1,14 +1,12 @@
 // figmaStore.ts
 import { figmaAPI } from "./figmaAPI";
 
-type StoreValue = object | number | string | boolean | null;
-
 type NodeTargetFn = (
 	figma: PluginAPI,
 	params: Record<string, any>,
 ) => SceneNode | BaseNode[];
 
-export function figmaState<T extends StoreValue>(
+export function figmaState<T>(
 	storageKey: string,
 	initialValue: T,
 	nodeTarget?: NodeTargetFn,
@@ -50,12 +48,9 @@ export function figmaState<T extends StoreValue>(
 		}
 	}
 
-	async function initialize() {
-		console.log("initializing", isInitialized);
-		if (isInitialized) return;
-
+	async function _loadStateFromStorage() {
 		try {
-			const storedState = await figmaAPI.run(
+			return await figmaAPI.run(
 				async (figma, inputParams) => {
 					const { key, params } = inputParams || {
 						key: "",
@@ -67,6 +62,20 @@ export function figmaState<T extends StoreValue>(
 				},
 				{ key: storageKey, params: params },
 			);
+		} catch (error) {
+			console.error(
+				`Failed to load state from storage for key "${storageKey}":`,
+				error,
+			);
+		}
+	}
+
+	async function initialize() {
+		console.log("initializing", isInitialized);
+		if (isInitialized) return;
+
+		try {
+			const storedState = await _loadStateFromStorage();
 			// Ensure that storedState is only applied if it is not undefined
 			if (typeof storedState !== "undefined") {
 				store = storedState;
