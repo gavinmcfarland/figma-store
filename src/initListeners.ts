@@ -30,7 +30,12 @@ export function initListeners() {
 						},
 					);
 
+					console.log("parsedObj", parsedObj, fn.toString());
+
 					const result = await fn(figma, parsedObj);
+
+					console.log("result", result);
+
 					figma.ui.postMessage({
 						type: "EVAL_RESULT",
 						result,

@@ -1,7 +1,7 @@
 // Read the docs https://plugma.dev/docs
 import { initListeners } from "figma-store";
 
-export default function () {
+export default async function () {
 	figma.showUI(__html__, { width: 300, height: 260, themeColors: true });
 
 	initListeners();
@@ -34,6 +34,16 @@ export default function () {
 			figma.viewport.scrollAndZoomIntoView(rectangles);
 		}
 	};
+
+	let count = await figma.clientStorage.getAsync("count");
+
+	// await new Promise((resolve) => setTimeout(resolve, 3000));
+	figma.ui.postMessage({
+		type: "STATE_UPDATE",
+		value: 100,
+	});
+
+	console.log(count);
 
 	function postNodeCount() {
 		const nodeCount = figma.currentPage.selection.length;

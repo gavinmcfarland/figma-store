@@ -1,5 +1,6 @@
 // figmaStore.ts
 import { figmaAPI } from "./figmaAPI";
+import { tick } from "svelte";
 
 type NodeTargetFn = (
 	figma: PluginAPI,
@@ -12,21 +13,49 @@ export function figmaState<T>(
 	nodeTarget?: NodeTargetFn,
 	params?: Record<string, any>,
 ) {
+	// @ts-ignore
+	let version = $state(0);
 	// Runtime check
 	if (typeof figma !== "undefined") {
 		throw new Error("FigmaStore cannot be used in the Figma main thread.");
 	}
 
 	let isInitialized = false;
+	let listeners = 0;
 
 	// @ts-ignore
-	let store = $state<T | undefined>(initialValue);
+	let value = $state<T | undefined>(initialValue);
+
+	const messageHandler = (event: MessageEvent) => {
+		let message = event.data.pluginMessage;
+		if (message.type === "STATE_UPDATE") {
+			value = message.value;
+			version += 1;
+		}
+	};
+
+	// @ts-ignore
+	$effect(() => {
+		if (listeners === 0) {
+			window.addEventListener("message", messageHandler);
+		}
+		listeners += 1;
+
+		return () => {
+			tick().then(() => {
+				listeners -= 1;
+				if (listeners === 0) {
+					window.removeEventListener("message", messageHandler);
+				}
+			});
+		};
+	});
 
 	async function _saveStateToStorage() {
 		try {
 			const inputParams = {
 				key: storageKey,
-				value: store,
+				value: value,
 				params: params,
 			};
 			await figmaAPI.run(async (figma, inputParams) => {
@@ -36,7 +65,7 @@ export function figmaState<T>(
 					value: undefined,
 					params: undefined,
 				};
-				if (!key || !value) return;
+				if (!key) return;
 				await figma.clientStorage.setAsync(key, value);
 				return value;
 			}, inputParams);
@@ -70,14 +99,14 @@ export function figmaState<T>(
 		}
 	}
 
-	async function initialize() {
+	async function init() {
 		if (isInitialized) return;
 
 		try {
 			const storedState = await _loadStateFromStorage();
 			// Apply stored state if it exists, otherwise keep initialValue
 			if (typeof storedState !== "undefined") {
-				store = storedState;
+				value = storedState;
 			}
 
 			isInitialized = true;
@@ -96,15 +125,18 @@ export function figmaState<T>(
 	});
 
 	function get(): T | undefined {
-		return store;
+		version; // Track version changes
+		return value;
 	}
 
 	function set(newState: T): void {
-		store = newState;
+		value = newState;
+		version += 1;
+		_saveStateToStorage();
 	}
 
 	function update(updater: (state: T) => T): void {
-		store = updater(store);
+		value = updater(value);
 		_saveStateToStorage();
 	}
 
@@ -112,8 +144,8 @@ export function figmaState<T>(
 		updater: (state: T) => Promise<T>,
 	): Promise<void> {
 		try {
-			const updated = await updater(store);
-			store = updated;
+			const updated = await updater(value);
+			value = updated;
 		} catch (err) {
 			console.error("Failed to update state asynchronously:", err);
 		}
@@ -129,12 +161,24 @@ export function figmaState<T>(
 	}
 
 	return {
-		initialize,
+		init,
 		get,
 		set,
 		update,
 		updateAsync,
 		getNodeTarget,
-		subscribe: (callback: (val: T) => void) => {},
+		subscribe: (callback: (val: T) => void) => {
+			if (listeners === 0) {
+				window.addEventListener("message", messageHandler);
+			}
+			listeners += 1;
+
+			return () => {
+				listeners -= 1;
+				if (listeners === 0) {
+					window.removeEventListener("message", messageHandler);
+				}
+			};
+		},
 	};
 }

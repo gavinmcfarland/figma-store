@@ -33,12 +33,14 @@
 	let isInitialized = $state(false);
 
 	onMount(async () => {
-		await count.initialize();
+		await count.init();
 		isInitialized = true;
 	});
 </script>
 
-{#if isInitialized}
+{#if !isInitialized}
+	<div></div>
+{:else}
 	<div class="container">
 		<div class="banner">
 			<Icon svg="plugma" size={38} />
@@ -56,9 +58,12 @@
 		</div>
 		<div class="field node-count">
 			<span>{nodeCount} nodes selected</span>
+		</div>
+		<div class="field count">
 			<Button onclick={() => count.update((state) => state + 1)}>
 				Increment
 			</Button>
+			<Button onclick={() => count.set(0)}>Reset</Button>
 			<p>{count.get()}</p>
 		</div>
 	</div>
