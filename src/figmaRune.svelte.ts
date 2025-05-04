@@ -14,10 +14,16 @@ class FigmaState<T> {
 	// @ts-ignore
 	private _value = $state<T | undefined>(undefined);
 
-	// Add a getter for direct value access
+	// Update getter and add setter for direct value access
 	get value() {
 		this.version; // Track version changes
 		return this._value;
+	}
+
+	set value(newValue: T | undefined) {
+		this._value = newValue;
+		this.version += 1;
+		this._saveStateToStorage("set");
 	}
 
 	private isInitialized = false;

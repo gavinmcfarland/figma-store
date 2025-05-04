@@ -49,7 +49,7 @@
 				Increment
 			</Button>
 
-			<Button onclick={() => count.set(10)}>Set to 10</Button>
+			<Button onclick={() => (count.value = 10)}>Set to 10</Button>
 
 			<Button onclick={() => count.set(0)}>Reset</Button>
 
