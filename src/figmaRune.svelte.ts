@@ -74,24 +74,28 @@ export function useFigmaState<T>(
 		};
 	});
 
-	async function _saveStateToStorage() {
+	async function _saveStateToStorage(stateType?: "set") {
 		try {
 			const inputParams = {
 				key: storageKey,
 				value: value,
 				params: params,
 			};
-			await figmaAPI.run(async (figma, inputParams) => {
-				// Safely destructure after checking if inputParams is defined
-				const { key, value, params } = inputParams || {
-					key: "",
-					value: undefined,
-					params: undefined,
-				};
-				if (!key) return;
-				await figma.clientStorage.setAsync(key, value);
-				return value;
-			}, inputParams);
+			await figmaAPI.run(
+				async (figma, inputParams) => {
+					// Safely destructure after checking if inputParams is defined
+					const { key, value, params } = inputParams || {
+						key: "",
+						value: undefined,
+						params: undefined,
+					};
+					if (!key) return;
+					await figma.clientStorage.setAsync(key, value);
+					return value;
+				},
+				inputParams,
+				stateType,
+			);
 		} catch (error) {
 			console.error(
 				`Failed to save state to storage for key "${storageKey}":`,
@@ -192,7 +196,7 @@ export function useFigmaState<T>(
 	function set(newState: T): void {
 		value = newState;
 		version += 1;
-		_saveStateToStorage();
+		_saveStateToStorage("set");
 	}
 
 	function update(updater: (state: T) => T): void {

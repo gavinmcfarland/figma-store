@@ -1,7 +1,30 @@
 // Used in main code context only
+import { evalMessage } from "./initListeners";
 
 // TODO: Can useFigmaState also create the clientStorage key if it hasn't been created by the UI yet?
 export function useFigmaState<T>(key: string, initialValue?: T) {
+	// FIXME: Needs updating to only trigger when manually set. Probably need to pass something to event
+	async function onUpdate(callback: (value: T) => void): Promise<() => void> {
+		const messageHandler = async (msg: any) => {
+			if (msg.stateType === "set") {
+				const result = await evalMessage(msg);
+				if (result) {
+					const { value, key: keyFromResult } = result;
+					if (keyFromResult === key) {
+						callback(value);
+					}
+				}
+			}
+		};
+
+		figma.ui.on("message", messageHandler);
+
+		// Return cleanup function
+		return () => {
+			figma.ui.off("message", messageHandler);
+		};
+	}
+
 	async function set(value: T) {
 		await figma.clientStorage.setAsync(key, value);
 
@@ -26,5 +49,6 @@ export function useFigmaState<T>(key: string, initialValue?: T) {
 		set,
 		get,
 		update,
+		onUpdate,
 	};
 }

@@ -7,17 +7,19 @@
 	import { onMount } from "svelte";
 
 	let rectCount: number = $state(5);
+	let rectCountState = useFigmaState<number>("rectCount");
 
 	function createRectangles(count: number) {
-		parent.postMessage(
-			{
-				pluginMessage: {
-					type: "CREATE_RECTANGLES",
-					count,
-				},
-			},
-			"*",
-		);
+		rectCountState.set(count);
+		// parent.postMessage(
+		// 	{
+		// 		pluginMessage: {
+		// 			type: "CREATE_RECTANGLES",
+		// 			count,
+		// 		},
+		// 	},
+		// 	"*",
+		// );
 	}
 
 	let nodeCount = useFigmaState<number>("nodeCount", 0);

@@ -1,22 +1,23 @@
+/**
+ * Helper function that ensures Figma typings within the run function.
+ * This function ensures that the `figma` object is available and correctly typed.
+ */
+export function figmaScopedRun<T, U>(
+	fn: (figma: PluginAPI, params: U | undefined) => Promise<T> | T,
+	params?: U,
+	stateType?: "set",
+): string {
+	// Ensure the Figma typings are scoped within this function and return the function string
+	// if (typeof figma !== "undefined") {
+	// We return the stringified function to be passed to postMessage
+	return fn.toString();
+	// } else {
+	// 	throw new Error("Figma environment not available.");
+	// }
+}
+
 class FigmaAPI {
 	private id = 0;
-
-	/**
-	 * Helper function that ensures Figma typings within the run function.
-	 * This function ensures that the `figma` object is available and correctly typed.
-	 */
-	private figmaScopedRun<T, U>(
-		fn: (figma: PluginAPI, params: U | undefined) => Promise<T> | T,
-		params?: U,
-	): string {
-		// Ensure the Figma typings are scoped within this function and return the function string
-		// if (typeof figma !== "undefined") {
-		// We return the stringified function to be passed to postMessage
-		return fn.toString();
-		// } else {
-		// 	throw new Error("Figma environment not available.");
-		// }
-	}
 
 	/**
 	 * Run a function in the Figma plugin context. The function cannot reference
@@ -27,6 +28,7 @@ class FigmaAPI {
 	run<T, U extends Record<string, any> | undefined>(
 		fn: (figma: PluginAPI, params: U | undefined) => Promise<T> | T,
 		params?: U,
+		stateType?: "set",
 	): Promise<T> {
 		return new Promise((resolve, reject) => {
 			const id = this.id++;
@@ -66,9 +68,10 @@ class FigmaAPI {
 			const msg = {
 				pluginMessage: {
 					type: "EVAL",
-					code: this.figmaScopedRun(fn, params), // Use figmaScopedRun to stringify the function
+					code: figmaScopedRun(fn, params), // Use figmaScopedRun to stringify the function
 					id,
 					params: params ? paramsString : undefined,
+					stateType,
 				},
 				pluginId: "*", // Adjust this if necessary
 			};
