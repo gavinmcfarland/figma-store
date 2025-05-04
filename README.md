@@ -95,7 +95,7 @@ count.on("change", (value) => {
 
 ## Exploring API shape
 
-### Idea 1
+### Idea 1
 
 ```ts
 let count = clientState<number>("count");
