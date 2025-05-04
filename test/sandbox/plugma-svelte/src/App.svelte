@@ -6,18 +6,16 @@
 	import { useFigmaState } from "figma-store/svelte";
 	import { onMount } from "svelte";
 
-	let rectCount: number = $state(5);
-	let rectCountState = useFigmaState<number>("rectCount");
+	let rectCountInput: number = $state(5);
 
-	let nodeCount = useFigmaState<number>("nodeCount", 0);
-	let count = useFigmaState<number>("count");
+	let rectCount = useFigmaState<number>("rectCount");
+	let selectedNodeCount = useFigmaState<number>("selectedNodeCount", 0);
+	let counter = useFigmaState<number>("count");
 
 	let isInitialized = $state(false);
 
 	onMount(async () => {
-		// await count.init();
-		count.on("init", (state) => {
-			// console.log("state", state);
+		counter.on("init", () => {
 			isInitialized = true;
 		});
 	});
@@ -36,24 +34,24 @@
 		</div>
 
 		<div class="field create-rectangles">
-			<Input type="number" bind:value={rectCount}></Input>
-			<Button onclick={() => (rectCountState.value = rectCount)}
+			<Input type="number" bind:value={rectCountInput}></Input>
+			<Button onclick={() => (rectCount.value = rectCountInput)}
 				>Create Rectangles</Button
 			>
 		</div>
 		<div class="field node-count">
-			<span>{nodeCount.value} nodes selected</span>
+			<span>{selectedNodeCount.value} nodes selected</span>
 		</div>
 		<div class="field count">
-			<Button onclick={() => count.update((state) => state + 1)}>
+			<Button onclick={() => counter.update((state) => state + 1)}>
 				Increment
 			</Button>
 
-			<Button onclick={() => (count.value = 10)}>Set to 10</Button>
+			<Button onclick={() => (counter.value = 10)}>Set to 10</Button>
 
-			<Button onclick={() => (count.value = 0)}>Reset</Button>
+			<Button onclick={() => (counter.value = 0)}>Reset</Button>
 
-			<p>{count.value}</p>
+			<p>{counter.value}</p>
 		</div>
 	</div>
 {/if}

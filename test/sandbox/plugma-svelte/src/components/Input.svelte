@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { value = $bindable(''), type = 'text', showIcon } = $props()
+	interface Props {
+		value?: any;
+		type?: string;
+		showIcon?: boolean;
+	}
+
+	let { value = $bindable(""), type = "text", showIcon }: Props = $props();
 </script>
 
 <div class="Input" data-non-interactive="true">
@@ -83,14 +89,14 @@
 		outline: unset;
 	}
 
-	input[type='number']::-webkit-inner-spin-button,
-	input[type='number']::-webkit-outer-spin-button {
+	input[type="number"]::-webkit-inner-spin-button,
+	input[type="number"]::-webkit-outer-spin-button {
 		-webkit-appearance: none;
 		margin: 0;
 	}
 
 	/* For Firefox */
-	input[type='number'] {
+	input[type="number"] {
 		-moz-appearance: textfield;
 	}
 </style>

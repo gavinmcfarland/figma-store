@@ -92,3 +92,86 @@ count.on("change", (value) => {
     });
 });
 ```
+
+## Exploring API shape
+
+### Idea 1
+
+```ts
+let count = clientState<number>("count");
+```
+
+```ts
+let count = pluginState("width", 100, {
+    node: () => figma.currentPage.selection[0],
+});
+```
+
+```ts
+let count = sharedState("width", 100, {
+    node: () => figma.currentPage.selection[0],
+});
+```
+
+```ts
+let count = volatileState("width", 100);
+```
+
+### Idea 2
+
+```ts
+let count = figmaState({
+    key: "count",
+    type: "client",
+    initial: 0,
+    node: () => figma.currentPage.selection[0],
+});
+```
+
+### Idea 3
+
+```ts
+let count = state.client("count", 0);
+```
+
+```ts
+let width = state.plugin("width", 100, {
+    node: () => figma.currentPage.selection[0],
+});
+```
+
+```ts
+let label = state.shared("label", "design", {
+    node: () => figma.currentPage.selection[0],
+});
+```
+
+```ts
+let hovered = state.volatile("hoveredNode", null);
+```
+
+### Idea 4
+
+```ts
+let count = state("count", 0, { type: "client" });
+let width = state("width", 100, {
+    type: "plugin",
+    node: () => figma.currentPage.selection[0],
+});
+let label = state("label", "Author", {
+    type: "shared",
+    node: () => figma.currentPage.selection[0],
+});
+let temp = state("hovered", null, { type: "volatile" });
+```
+
+### Idea 5
+
+```ts
+let count = state.from("client")("count", 0);
+let width = state.from("plugin")("width", 100, { node: getNode });
+let label = state.from("shared")("label", "Author", { node: getNode });
+let temp = state.from("volatile")("hovered", null);
+```
+
+### Idea 6
