@@ -13,14 +13,14 @@ npm install github:gavinmcfarland/figma-store
 
 ## Setup
 
-Inside the `ui` context, import the `figmaState` reactive primitive.
+Inside the `ui` context, import the `useFigmaState` reactive primitive.
 
 ```js
 // ui.ts
 import { useFigmaState } from "figma-store/svelte";
 ```
 
-Within the main code, import the `figmaState` function which will initialise the listeners.
+Within the main code, import the `useFigmaState` function which will initialise the listeners.
 
 ```js
 // code.ts
