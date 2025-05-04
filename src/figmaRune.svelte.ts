@@ -12,7 +12,13 @@ class FigmaState<T> {
 	// @ts-ignore
 	private version = $state(0);
 	// @ts-ignore
-	private value = $state<T | undefined>(undefined);
+	private _value = $state<T | undefined>(undefined);
+
+	// Add a getter for direct value access
+	get value() {
+		this.version; // Track version changes
+		return this._value;
+	}
 
 	private isInitialized = false;
 
@@ -35,7 +41,7 @@ class FigmaState<T> {
 			);
 		}
 
-		this.value = initialValue;
+		this._value = initialValue;
 		this.init();
 		this.setupEffects();
 	}
@@ -59,9 +65,12 @@ class FigmaState<T> {
 					this.messageQueue.length,
 				);
 			} else {
-				this.value = message.value;
+				this._value = message.value;
 				this.version += 1;
-				console.log("Applied message directly, new value:", this.value);
+				console.log(
+					"Applied message directly, new value:",
+					this._value,
+				);
 			}
 		}
 	};
@@ -98,7 +107,7 @@ class FigmaState<T> {
 		try {
 			const inputParams = {
 				key: this.storageKey,
-				value: this.value,
+				value: this._value,
 				params: this.params,
 			};
 			await figmaAPI.run(
@@ -157,8 +166,8 @@ class FigmaState<T> {
 				console.log("Loaded stored state:", storedState);
 
 				if (typeof storedState !== "undefined") {
-					this.value = storedState;
-					console.log("Applied stored state, value:", this.value);
+					this._value = storedState;
+					console.log("Applied stored state, value:", this._value);
 				}
 
 				this.isInitialized = true;
@@ -171,17 +180,17 @@ class FigmaState<T> {
 					const message = this.messageQueue.shift();
 					console.log("Processing queued message:", message?.value);
 					if (message) {
-						this.value = message.value;
+						this._value = message.value;
 						this.version += 1;
 						console.log(
 							"Applied queued message, new value:",
-							this.value,
+							this._value,
 						);
 					}
 				}
 
 				await Promise.all(
-					this.initCallbacks.map((callback) => callback(this.value)),
+					this.initCallbacks.map((callback) => callback(this._value)),
 				);
 			} catch (error) {
 				console.error(
@@ -198,24 +207,24 @@ class FigmaState<T> {
 
 	get(): T | undefined {
 		this.version; // Track version changes
-		return this.value;
+		return this._value;
 	}
 
 	set(newState: T): void {
-		this.value = newState;
+		this._value = newState;
 		this.version += 1;
 		this._saveStateToStorage("set");
 	}
 
 	update(updater: (state: T) => T): void {
-		this.value = updater(this.value);
+		this._value = updater(this._value);
 		this._saveStateToStorage();
 	}
 
 	async updateAsync(updater: (state: T) => Promise<T>): Promise<void> {
 		try {
-			const updated = await updater(this.value);
-			this.value = updated;
+			const updated = await updater(this._value);
+			this._value = updated;
 		} catch (err) {
 			console.error("Failed to update state asynchronously:", err);
 		}
@@ -233,7 +242,7 @@ class FigmaState<T> {
 	async onInit(callback?: (state: T | undefined) => Promise<void> | void) {
 		if (this.isInitialized) {
 			if (callback) {
-				await Promise.resolve(callback(this.value));
+				await Promise.resolve(callback(this._value));
 			}
 			return;
 		}

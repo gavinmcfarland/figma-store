@@ -49,9 +49,11 @@
 				Increment
 			</Button>
 
+			<Button onclick={() => count.set(10)}>Set to 10</Button>
+
 			<Button onclick={() => count.set(0)}>Reset</Button>
 
-			<p>{count.get()}</p>
+			<p>{count.value}</p>
 		</div>
 	</div>
 {/if}
