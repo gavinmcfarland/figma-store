@@ -9,36 +9,36 @@ type NodeTargetFn = (
 ) => SceneNode | BaseNode[];
 
 class FigmaState<T> {
+	#storageKey: string;
 	// @ts-ignore
-	private version = $state(0);
+	#version = $state(0);
 	// @ts-ignore
-	private _value = $state<T | undefined>(undefined);
+	#value = $state<T | undefined>(undefined);
+	#isInitialized = false;
+	#listeners = 0;
+	#initCallbacks: ((state: T | undefined) => Promise<void> | void)[] = [];
+	#messageQueue: { type: string; value: any }[] = [];
+	#initPromise: Promise<void> | null = null;
+	#nodeTarget?: NodeTargetFn;
+	#params?: Record<string, any>;
 
 	// Update getter and add setter for direct value access
 	get value() {
-		this.version; // Track version changes
-		return this._value;
+		this.#version; // Track version changes
+		return this.#value;
 	}
 
 	set value(newValue: T | undefined) {
-		this._value = newValue;
-		this.version += 1;
-		this._saveStateToStorage("set");
+		this.#value = newValue;
+		this.#version += 1;
+		this.#saveStateToStorage("set");
 	}
 
-	private isInitialized = false;
-
-	private listeners = 0;
-	private initCallbacks: ((state: T | undefined) => Promise<void> | void)[] =
-		[];
-	private messageQueue: { type: string; value: any }[] = [];
-	private initPromise: Promise<void> | null = null;
-
 	constructor(
-		private storageKey: string,
-		private initialValue?: T,
-		private nodeTarget?: NodeTargetFn,
-		private params?: Record<string, any>,
+		storageKey: string,
+		initialValue?: T,
+		nodeTarget?: NodeTargetFn,
+		params?: Record<string, any>,
 	) {
 		// Runtime check
 		if (typeof figma !== "undefined") {
@@ -47,35 +47,38 @@ class FigmaState<T> {
 			);
 		}
 
-		this._value = initialValue;
+		this.#storageKey = storageKey;
+		this.#value = initialValue;
+		this.#nodeTarget = nodeTarget;
+		this.#params = params;
 		this.init();
 		this.setupEffects();
 	}
 
-	private messageHandler = (event: MessageEvent) => {
+	#messageHandler = (event: MessageEvent) => {
 		let message = event.data.pluginMessage;
 		if (
 			message.type === "UPDATE_STATE" &&
-			message.key === this.storageKey
+			message.key === this.#storageKey
 		) {
 			console.log(
 				"Received message:",
 				message.value,
 				"isInitialized:",
-				this.isInitialized,
+				this.#isInitialized,
 			);
-			if (!this.isInitialized) {
-				this.messageQueue.push(message);
+			if (!this.#isInitialized) {
+				this.#messageQueue.push(message);
 				console.log(
 					"Queued message, queue length:",
-					this.messageQueue.length,
+					this.#messageQueue.length,
 				);
 			} else {
-				this._value = message.value;
-				this.version += 1;
+				this.#value = message.value;
+				this.#version += 1;
 				console.log(
 					"Applied message directly, new value:",
-					this._value,
+					this.#value,
 				);
 			}
 		}
@@ -84,18 +87,18 @@ class FigmaState<T> {
 	private setupEffects() {
 		// @ts-ignore
 		$effect(() => {
-			if (this.listeners === 0) {
-				window.addEventListener("message", this.messageHandler);
+			if (this.#listeners === 0) {
+				window.addEventListener("message", this.#messageHandler);
 			}
-			this.listeners += 1;
+			this.#listeners += 1;
 
 			return () => {
 				tick().then(() => {
-					this.listeners -= 1;
-					if (this.listeners === 0) {
+					this.#listeners -= 1;
+					if (this.#listeners === 0) {
 						window.removeEventListener(
 							"message",
-							this.messageHandler,
+							this.#messageHandler,
 						);
 					}
 				});
@@ -104,17 +107,17 @@ class FigmaState<T> {
 
 		// @ts-ignore
 		$effect(() => {
-			if (!this.isInitialized) return;
-			this._saveStateToStorage();
+			if (!this.#isInitialized) return;
+			this.#saveStateToStorage();
 		});
 	}
 
-	private async _saveStateToStorage(stateType?: "set") {
+	async #saveStateToStorage(stateType?: "set") {
 		try {
 			const inputParams = {
-				key: this.storageKey,
-				value: this._value,
-				params: this.params,
+				key: this.#storageKey,
+				value: this.#value,
+				params: this.#params,
 			};
 			await figmaAPI.run(
 				async (figma, inputParams) => {
@@ -132,13 +135,13 @@ class FigmaState<T> {
 			);
 		} catch (error) {
 			console.error(
-				`Failed to save state to storage for key "${this.storageKey}":`,
+				`Failed to save state to storage for key "${this.#storageKey}":`,
 				error,
 			);
 		}
 	}
 
-	private async _loadStateFromStorage() {
+	async #loadStateFromStorage() {
 		try {
 			return await figmaAPI.run(
 				async (figma, inputParams) => {
@@ -149,96 +152,98 @@ class FigmaState<T> {
 					if (!key) return;
 					return await figma.clientStorage.getAsync(key);
 				},
-				{ key: this.storageKey, params: this.params },
+				{ key: this.#storageKey, params: this.#params },
 			);
 		} catch (error) {
 			console.error(
-				`Failed to load state from storage for key "${this.storageKey}":`,
+				`Failed to load state from storage for key "${this.#storageKey}":`,
 				error,
 			);
 		}
 	}
 
 	async init() {
-		if (this.initPromise) {
-			return this.initPromise;
+		if (this.#initPromise) {
+			return this.#initPromise;
 		}
 
-		if (this.isInitialized) return;
+		if (this.#isInitialized) return;
 
-		this.initPromise = (async () => {
+		this.#initPromise = (async () => {
 			try {
-				const storedState = await this._loadStateFromStorage();
+				const storedState = await this.#loadStateFromStorage();
 				console.log("Loaded stored state:", storedState);
 
 				if (typeof storedState !== "undefined") {
-					this._value = storedState;
-					console.log("Applied stored state, value:", this._value);
+					this.#value = storedState;
+					console.log("Applied stored state, value:", this.#value);
 				}
 
-				this.isInitialized = true;
+				this.#isInitialized = true;
 				console.log(
 					"Processing queued messages, count:",
-					this.messageQueue.length,
+					this.#messageQueue.length,
 				);
 
-				while (this.messageQueue.length > 0) {
-					const message = this.messageQueue.shift();
+				while (this.#messageQueue.length > 0) {
+					const message = this.#messageQueue.shift();
 					console.log("Processing queued message:", message?.value);
 					if (message) {
-						this._value = message.value;
-						this.version += 1;
+						this.#value = message.value;
+						this.#version += 1;
 						console.log(
 							"Applied queued message, new value:",
-							this._value,
+							this.#value,
 						);
 					}
 				}
 
 				await Promise.all(
-					this.initCallbacks.map((callback) => callback(this._value)),
+					this.#initCallbacks.map((callback) =>
+						callback(this.#value),
+					),
 				);
 			} catch (error) {
 				console.error(
-					`Failed to load state from storage for key "${this.storageKey}":`,
+					`Failed to load state from storage for key "${this.#storageKey}":`,
 					error,
 				);
 			} finally {
-				this.initPromise = null;
+				this.#initPromise = null;
 			}
 		})();
 
-		return this.initPromise;
+		return this.#initPromise;
 	}
 
 	get(): T | undefined {
-		this.version; // Track version changes
-		return this._value;
+		this.#version; // Track version changes
+		return this.#value;
 	}
 
 	set(newState: T): void {
-		this._value = newState;
-		this.version += 1;
-		this._saveStateToStorage("set");
+		this.#value = newState;
+		this.#version += 1;
+		this.#saveStateToStorage("set");
 	}
 
 	update(updater: (state: T) => T): void {
-		this._value = updater(this._value);
-		this._saveStateToStorage();
+		this.#value = updater(this.#value);
+		this.#saveStateToStorage();
 	}
 
 	async updateAsync(updater: (state: T) => Promise<T>): Promise<void> {
 		try {
-			const updated = await updater(this._value);
-			this._value = updated;
+			const updated = await updater(this.#value);
+			this.#value = updated;
 		} catch (err) {
 			console.error("Failed to update state asynchronously:", err);
 		}
 	}
 
 	getNodeTarget(): SceneNode | BaseNode | BaseNode[] | undefined {
-		if (!this.nodeTarget) return;
-		const target = this.nodeTarget(figma, this.params || {});
+		if (!this.#nodeTarget) return;
+		const target = this.#nodeTarget(figma, this.#params || {});
 		if (Array.isArray(target)) {
 			return target.length > 0 ? target : undefined;
 		}
@@ -246,15 +251,15 @@ class FigmaState<T> {
 	}
 
 	async onInit(callback?: (state: T | undefined) => Promise<void> | void) {
-		if (this.isInitialized) {
+		if (this.#isInitialized) {
 			if (callback) {
-				await Promise.resolve(callback(this._value));
+				await Promise.resolve(callback(this.#value));
 			}
 			return;
 		}
 
 		const initPromise = new Promise<void>((resolve) => {
-			this.initCallbacks.push(async (state) => {
+			this.#initCallbacks.push(async (state) => {
 				if (callback) {
 					await Promise.resolve(callback(state));
 				}
@@ -262,7 +267,7 @@ class FigmaState<T> {
 			});
 		});
 
-		if (!this.isInitialized) {
+		if (!this.#isInitialized) {
 			this.init();
 		}
 
@@ -270,15 +275,15 @@ class FigmaState<T> {
 	}
 
 	subscribe(callback: (val: T) => void) {
-		if (this.listeners === 0) {
-			window.addEventListener("message", this.messageHandler);
+		if (this.#listeners === 0) {
+			window.addEventListener("message", this.#messageHandler);
 		}
-		this.listeners += 1;
+		this.#listeners += 1;
 
 		return () => {
-			this.listeners -= 1;
-			if (this.listeners === 0) {
-				window.removeEventListener("message", this.messageHandler);
+			this.#listeners -= 1;
+			if (this.#listeners === 0) {
+				window.removeEventListener("message", this.#messageHandler);
 			}
 		};
 	}
