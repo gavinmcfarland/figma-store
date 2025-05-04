@@ -4,7 +4,10 @@ import { evalMessage } from "./initListeners";
 // TODO: Can useFigmaState also create the clientStorage key if it hasn't been created by the UI yet?
 export function useFigmaState<T>(key: string, initialValue?: T) {
 	// FIXME: Needs updating to only trigger when manually set. Probably need to pass something to event
-	async function onChange(callback: (value: T) => void): Promise<() => void> {
+	async function on(
+		event: "change",
+		callback: (value: T) => void,
+	): Promise<() => void> {
 		const messageHandler = async (msg: any) => {
 			if (msg.stateType === "set") {
 				const result = await evalMessage(msg);
@@ -17,7 +20,9 @@ export function useFigmaState<T>(key: string, initialValue?: T) {
 			}
 		};
 
-		figma.ui.on("message", messageHandler);
+		if (event === "change") {
+			figma.ui.on("message", messageHandler);
+		}
 
 		// Return cleanup function
 		return () => {
@@ -49,6 +54,6 @@ export function useFigmaState<T>(key: string, initialValue?: T) {
 		set,
 		get,
 		update,
-		onChange,
+		on,
 	};
 }

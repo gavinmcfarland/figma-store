@@ -16,7 +16,7 @@
 
 	onMount(async () => {
 		// await count.init();
-		count.onInit((state) => {
+		count.on("init", (state) => {
 			// console.log("state", state);
 			isInitialized = true;
 		});
@@ -37,12 +37,12 @@
 
 		<div class="field create-rectangles">
 			<Input type="number" bind:value={rectCount}></Input>
-			<Button onclick={() => rectCountState.set(rectCount)}
+			<Button onclick={() => (rectCountState.value = rectCount)}
 				>Create Rectangles</Button
 			>
 		</div>
 		<div class="field node-count">
-			<span>{nodeCount.get()} nodes selected</span>
+			<span>{nodeCount.value} nodes selected</span>
 		</div>
 		<div class="field count">
 			<Button onclick={() => count.update((state) => state + 1)}>
@@ -51,7 +51,7 @@
 
 			<Button onclick={() => (count.value = 10)}>Set to 10</Button>
 
-			<Button onclick={() => count.set(0)}>Reset</Button>
+			<Button onclick={() => (count.value = 0)}>Reset</Button>
 
 			<p>{count.value}</p>
 		</div>

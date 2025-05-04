@@ -17,6 +17,12 @@ class FigmaState<T> {
 	#isInitialized = false;
 	#listeners = 0;
 	#initCallbacks: ((state: T | undefined) => Promise<void> | void)[] = [];
+	#eventCallbacks: Record<
+		string,
+		((state: T | undefined) => Promise<void> | void)[]
+	> = {
+		init: [],
+	};
 	#messageQueue: { type: string; value: any }[] = [];
 	#initPromise: Promise<void> | null = null;
 	#nodeTarget?: NodeTargetFn;
@@ -250,28 +256,39 @@ class FigmaState<T> {
 		return target;
 	}
 
-	async onInit(callback?: (state: T | undefined) => Promise<void> | void) {
-		if (this.#isInitialized) {
-			if (callback) {
-				await Promise.resolve(callback(this.#value));
-			}
-			return;
-		}
-
-		const initPromise = new Promise<void>((resolve) => {
-			this.#initCallbacks.push(async (state) => {
+	on(
+		event: string,
+		callback: (state: T | undefined) => Promise<void> | void,
+	) {
+		if (event === "init") {
+			if (this.#isInitialized) {
 				if (callback) {
-					await Promise.resolve(callback(state));
+					Promise.resolve(callback(this.#value));
 				}
-				resolve();
-			});
-		});
+				return;
+			}
 
-		if (!this.#isInitialized) {
-			this.init();
+			const initPromise = new Promise<void>((resolve) => {
+				this.#initCallbacks.push(async (state) => {
+					if (callback) {
+						await Promise.resolve(callback(state));
+					}
+					resolve();
+				});
+			});
+
+			if (!this.#isInitialized) {
+				this.init();
+			}
+
+			return initPromise;
 		}
 
-		return initPromise;
+		// Handle other events if needed
+		if (!this.#eventCallbacks[event]) {
+			this.#eventCallbacks[event] = [];
+		}
+		this.#eventCallbacks[event].push(callback);
 	}
 
 	subscribe(callback: (val: T) => void) {

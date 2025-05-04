@@ -6,7 +6,7 @@ export default async function () {
 
 	let rectCount = useFigmaState<number>("rectCount");
 
-	rectCount.onChange((value) => {
+	rectCount.on("change", (value) => {
 		const rectangles = Array.from({ length: value }, (_, i) => {
 			const rect = figma.createRectangle();
 			rect.x = i * 150;

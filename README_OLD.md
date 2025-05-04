@@ -82,7 +82,7 @@ let store = await FigmaStore.create(
     (figma, { id }) => {
         return figma.root.findAll((node) => node.name === layerStyle + id);
     },
-    { id }
+    { id },
 );
 ```
 
@@ -110,3 +110,66 @@ await sites.updateAsync(async (figma, store, { siteId }) => {
     return store
 )
 ```
+
+## Methods
+
+- ### onInit
+
+    This loads the store from `clientStorage`.
+
+    Use the `onInit` method to listen for when the state is initialised.
+
+    ```js
+    // ui.ts
+    let isInitialized;
+
+    count.onInit((value) => {
+        isInitialized = true;
+    });
+    ```
+
+- ### Set
+
+    ```ts
+    count.set(10);
+    ```
+
+- ### Update
+
+    ```js
+    count.update((value) => value + 1);
+    ```
+
+- ### Get
+
+    ```ts
+    console.log(count.get()); // => 10
+    ```
+
+## Main
+
+Within the `main` context you can also manipulate the state.
+
+- ### Use
+
+    ```ts
+    let count = useFigmaState<number>("count");
+    ```
+
+- ### Set
+
+    ```ts
+    count.set(100);
+    ```
+
+- ### Update
+
+    ```ts
+    count.update((value) => value + 1);
+    ```
+
+- ### Get
+
+    ```ts
+    console.log(count.get()); // => 10
+    ```

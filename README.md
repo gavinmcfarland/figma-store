@@ -42,7 +42,7 @@ Within the `ui` context you can create a reactive state using the `useFigmaState
     let isInitialized = $state(false);
 
     $effect(() => {
-        count.onInit((value) => {
+        count.on("init", (value) => {
             isInitialized = true;
         });
     });
@@ -52,7 +52,7 @@ Within the `ui` context you can create a reactive state using the `useFigmaState
     <p>Loading...</p>
 {:else}
     <button on:click={() => count.update((value) => value + 1)}>Increment</button>
-    <p>{count}</p>
+    <p>{count.value}</p>
 {/if}
 ```
 
@@ -73,12 +73,11 @@ figma.on("selectionchange", () => {
 And detect when the state changes. Below show you how you can use the state to create rectangles.
 
 ```ts
-count.onChange((value) => {
+count.on("change", (value) => {
     const rects = Array.from({ length: value }, (_, i) => {
         const rect = figma.createRectangle();
         rect.x = i * 150;
         rect.y = 0;
-        rect.resize(100, 100);
         rect.fills = [
             {
                 type: "SOLID",
@@ -91,74 +90,5 @@ count.onChange((value) => {
         ];
         return rect;
     });
-
-    figma.viewport.scrollAndZoomIntoView(rects);
 });
-```
-
-## Methods
-
-- ### onInit
-
-    This loads the store from `clientStorage`.
-
-    Use the `onInit` method to listen for when the state is initialised.
-
-    ```js
-    // ui.ts
-    let isInitialized;
-
-    count.onInit((value) => {
-        isInitialized = true;
-    });
-    ```
-
-- ### Set
-
-    ```ts
-    count.set(10);
-    ```
-
-- ### Update
-
-    ```js
-    count.update((value) => value + 1);
-    ```
-
-- ### Get
-
-    ```ts
-    console.log(count.get()); // => 10
-    ```
-
-## Main
-
-Within the `main` context you can also manipulate the state.
-
-- ### Use
-
-    ```ts
-    let count = useFigmaState<number>("count");
-    ```
-
-- ### Set
-
-    ```ts
-    count.set(100);
-    ```
-
-- ### Update
-
-    ```ts
-    count.update((value) => value + 1);
-    ```
-
-- ### Get
-
-    ```ts
-    console.log(count.get()); // => 10
-    ```
-
-```
-
 ```
