@@ -175,3 +175,10 @@ let temp = state.from("volatile")("hovered", null);
 ```
 
 ### Idea 6
+
+```ts
+let count = state("count", 0); // volatile
+let count = state("count", 0, { persist: "client" });
+let width = state("width", 100, { persist: "plugin", node: getNode });
+let label = state("label", "Author", { persist: "shared", node: getNode });
+```
