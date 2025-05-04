@@ -70,6 +70,32 @@ figma.on("selectionchange", () => {
 });
 ```
 
+And detect when the state changes. Below show you how you can use the state to create rectangles.
+
+```ts
+count.onChange((value) => {
+    const rects = Array.from({ length: value }, (_, i) => {
+        const rect = figma.createRectangle();
+        rect.x = i * 150;
+        rect.y = 0;
+        rect.resize(100, 100);
+        rect.fills = [
+            {
+                type: "SOLID",
+                color: {
+                    r: Math.random(),
+                    g: Math.random(),
+                    b: Math.random(),
+                },
+            },
+        ];
+        return rect;
+    });
+
+    figma.viewport.scrollAndZoomIntoView(rects);
+});
+```
+
 ## Methods
 
 - ### onInit

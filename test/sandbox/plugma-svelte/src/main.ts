@@ -6,11 +6,8 @@ export default async function () {
 
 	let rectCount = useFigmaState<number>("rectCount");
 
-	rectCount.onUpdate((value) => {
-		let i = 0;
-
-		let rectangles = [];
-		while (i < value) {
+	rectCount.onChange((value) => {
+		const rectangles = Array.from({ length: value }, (_, i) => {
 			const rect = figma.createRectangle();
 			rect.x = i * 150;
 			rect.y = 0;
@@ -24,11 +21,9 @@ export default async function () {
 						b: Math.random(),
 					},
 				},
-			]; // Random color
-			rectangles.push(rect);
-
-			i++;
-		}
+			];
+			return rect;
+		});
 
 		figma.viewport.scrollAndZoomIntoView(rectangles);
 	});

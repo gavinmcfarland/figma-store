@@ -9,19 +9,6 @@
 	let rectCount: number = $state(5);
 	let rectCountState = useFigmaState<number>("rectCount");
 
-	function createRectangles(count: number) {
-		rectCountState.set(count);
-		// parent.postMessage(
-		// 	{
-		// 		pluginMessage: {
-		// 			type: "CREATE_RECTANGLES",
-		// 			count,
-		// 		},
-		// 	},
-		// 	"*",
-		// );
-	}
-
 	let nodeCount = useFigmaState<number>("nodeCount", 0);
 	let count = useFigmaState<number>("count");
 
@@ -50,7 +37,7 @@
 
 		<div class="field create-rectangles">
 			<Input type="number" bind:value={rectCount}></Input>
-			<Button onclick={() => createRectangles(rectCount)}
+			<Button onclick={() => rectCountState.set(rectCount)}
 				>Create Rectangles</Button
 			>
 		</div>
