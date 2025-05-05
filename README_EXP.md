@@ -38,7 +38,10 @@ Within the `ui` context you can create a reactive state using the `useFigmaState
 <script lang="ts">
     import { useFigmaState } from "figma-store/svelte";
 
-    let count = useFigmaState<number>("count");
+    let count = useFigmaState<number>("count", {
+        persist: "client",
+    });
+
     let isInitialized = $state(false);
 
     $effect(() => {
@@ -63,7 +66,9 @@ When you close and reopen the plugin the state will be persisted in `clientStora
 From the `main` context you can also manipulate the state. With the following example the state in the `ui` context will be updated when the user changes the selection.
 
 ```ts
-let count = useFigmaState<number>("count");
+import { count as countState } from "./shared-state.ts";
+
+let count = useFigmaState(countState);
 
 figma.on("selectionchange", () => {
     count.set(figma.currentPage.selection.length);
@@ -117,7 +122,7 @@ let count = sharedState("width", 100, {
 let count = volatileState("width", 100);
 ```
 
-### Idea 2
+### Idea 2
 
 ```ts
 let count = figmaState({
@@ -181,4 +186,81 @@ let count = state("count", 0); // volatile
 let count = state("count", 0, { persist: "client" });
 let width = state("width", 100, { persist: "plugin", node: getNode });
 let label = state("label", "Author", { persist: "shared", node: getNode });
+```
+
+### Idea 7
+
+```ts
+let count = createStore("count", 0, {
+    increment: () => count++,
+});
+```
+
+```ts
+let count = createStore("count", 0, persist(
+    {
+        increment: () => count++
+    },
+    {
+        storage: clientStorage,
+    }
+);
+```
+
+```ts
+let count = createStore(
+    "count",
+    0,
+    {
+        increment: () => count++,
+    },
+    {
+        storage: clientStorage,
+    },
+);
+```
+
+```ts
+let { count, increment } = createStore("count", {
+    count: 0,
+    increment: () => count++,
+});
+```
+
+```ts
+let count = createStore("count", {
+    value: 0,
+    increment: () => count++,
+});
+
+count.value;
+count.increment();
+```
+
+```ts
+let count = () => {
+
+    return {
+        value: 0,
+        increment: () => count++,
+    };
+}();
+
+count.value;
+count.increment();
+```
+
+```ts
+let count = createStore("count", 0, {
+    actions: (store) => ({
+        increment() {
+            store.set(store.get() + 1);
+        },
+    }),
+    storage: figmaStorage, // optional
+    hydrate: async () => {
+        const remoteValue = await fetch("/api/count").then((r) => r.json());
+        return remoteValue;
+    },
+});
 ```
